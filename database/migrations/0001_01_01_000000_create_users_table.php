@@ -4,46 +4,26 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class AddFieldsToUsersTable extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
-            $table->timestamps();
-        });
-
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
-        });
-
-        Schema::create('sessions', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
-            $table->string('ip_address', 45)->nullable();
-            $table->text('user_agent')->nullable();
-            $table->longText('payload');
-            $table->integer('last_activity')->index();
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('numero_usuario')->unique()->after('id');
+            $table->integer('edad')->nullable();
+            $table->enum('sexo',['M','F','Otro'])->nullable();
+            $table->decimal('peso',5,2)->nullable();
+            $table->decimal('altura',5,2)->nullable();
+            $table->enum('nivel_conocimiento',['Principiante','Intermedio','Avanzado'])->default('Principiante');
+            $table->enum('objetivo',['Perder peso','Ganar músculo','Tonificación'])->nullable();
+            $table->enum('tipo_usuario',['Registrado','Invitado','Admin'])->default('Registrado');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
-        Schema::dropIfExists('sessions');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn(['numero_usuario','edad','sexo','peso','altura','nivel_conocimiento','objetivo','tipo_usuario']);
+        });
     }
-};
+}
