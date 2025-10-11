@@ -1,29 +1,19 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-// Registro
-Route::post('/register', [AuthController::class, 'register']);
-
-// Login
-Route::post('/login', [AuthController::class, 'login']);
-
-// Logout
-Route::post('/logout', [AuthController::class, 'logout']);
-
-// Perfil actual
-Route::get('/me', [AuthController::class, 'me']);
-
-// Actualizar perfil
-Route::put('/update', [AuthController::class, 'update']);
-
-// Recuperar contraseña
-Route::post('/password/email', [AuthController::class, 'sendResetLink']);
-
-// Restablecer contraseña
-Route::post('/password/reset', [AuthController::class, 'resetPassword']);
+// Grupo de rutas API sin middleware web
+Route::prefix('api')->withoutMiddleware('web')->group(function () {
+    Route::get('/usuarios', [UserController::class, 'index']);
+    Route::get('/usuarios/{id}', [UserController::class, 'show']);
+    Route::post('/usuarios', [UserController::class, 'register']);
+    Route::post('/login', [UserController::class, 'login']);
+    Route::post('/logout', [UserController::class, 'logout']);
+    Route::put('/usuarios/{id}', [UserController::class, 'update']);
+    Route::delete('/usuarios/{id}', [UserController::class, 'destroy']);
+});

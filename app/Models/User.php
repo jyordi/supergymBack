@@ -5,21 +5,17 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Tymon\JWTAuth\Contracts\JWTSubject;
-
-
-class User extends Authenticatable implements JWTSubject
+class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use Notifiable;
 
     protected $fillable = [
-        'numero_usuario',
-        'name',
-        'email',
+        'nombre', 
+        'email', 
         'password',
+        'numero_usuario',
         'edad',
-        'sexo',
+        'sexo', 
         'peso',
         'altura',
         'nivel_conocimiento',
@@ -27,17 +23,8 @@ class User extends Authenticatable implements JWTSubject
         'tipo_usuario'
     ];
 
-    protected $hidden = ['password', 'remember_token'];
-
-    // JWT
-    public function getJWTIdentifier() { return $this->getKey(); }
-    public function getJWTCustomClaims() { return []; }
-
-    // Cast para password
-    protected $casts = [
-        'password' => 'hashed',
+    protected $hidden = [
+        'password',
+        'remember_token',
     ];
-
-
-    
 }
