@@ -4,13 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Rutina extends Model
+class Ejercicio extends Model
 {
     protected $fillable = ['nombre', 'descripcion'];
 
-    public function ejercicios()
+    public function rutinas()
     {
-        return $this->belongsToMany(Ejercicio::class, 'rutina_ejercicio')
+        return $this->belongsToMany(Rutina::class, 'rutina_ejercicio')
             ->withPivot('series', 'repeticiones')
             ->withTimestamps();
     }
