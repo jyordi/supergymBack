@@ -15,6 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('nombre');
             $table->text('descripcion')->nullable();
+            // Día de la semana asignado a la rutina (Lunes..Domingo)
+            $table->enum('dia', ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'])->nullable();
+            // Nivel de la rutina
+            $table->enum('nivel', ['Principiante','Intermedio','Avanzado'])->default('Principiante');
             $table->timestamps();
         });
 
@@ -24,6 +28,8 @@ return new class extends Migration
             $table->foreignId('ejercicio_id')->constrained('ejercicios')->onDelete('cascade');
             $table->integer('series')->default(3);
             $table->string('repeticiones')->default('12');
+            // Nivel específico para este ejercicio dentro de la rutina
+            $table->enum('nivel', ['Principiante','Intermedio','Avanzado'])->nullable();
             $table->timestamps();
         });
     }

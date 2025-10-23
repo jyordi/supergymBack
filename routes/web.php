@@ -26,8 +26,25 @@ Route::post('/rutinas', [RutinaController::class, 'store']);
 Route::put('/rutinas/{id}', [RutinaController::class, 'update']);
 Route::delete('/rutinas/{id}', [RutinaController::class, 'destroy']);
 
-// Asignar ejercicio a rutina
-Route::post('/rutinas/{rutina_id}/ejercicios', [RutinaController::class, 'addEjercicio']);
+// Obtener rutinas del día actual o pasado por query (?dia=Martes)
+Route::get('/rutinas/hoy', [RutinaController::class, 'hoy']);
 
-// Eliminar ejercicio de rutina
-Route::delete('/rutinas/{rutina_id}/ejercicios/{ejercicio_id}', [RutinaController::class, 'removeEjercicio']);
+// Obtener rutinas por día
+// GET /rutinas/dia/{dia}   ejemplo: /rutinas/dia/Martes
+// Opcional: /rutinas/dia/Martes?nivel=Avanzado
+Route::get('/rutinas/dia/{dia}', [RutinaController::class, 'porDia']);
+
+// Añadir ejercicio a una rutina en un día concreto
+// POST /rutinas/dia/{rutina_dia_id}/ejercicios
+/*
+Body JSON:
+{
+  "ejercicio_id": 5,
+  "series": 4,
+  "repeticiones": "10-12"
+}
+*/
+Route::post('/rutinas/dia/{rutina_dia_id}/ejercicios', [RutinaController::class, 'addEjercicioADia']);
+
+// Eliminar ejercicio de un día concreto
+Route::delete('/rutinas/dia/{rutina_dia_id}/ejercicios/{ejercicio_id}', [RutinaController::class, 'removeEjercicioDeDia']);
