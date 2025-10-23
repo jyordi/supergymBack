@@ -3,10 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Carbon\Carbon;
+use App\Models\Ejercicio;
+use App\Models\RutinaDia;
 
 class Rutina extends Model
 {
+    use HasFactory;
+
     protected $fillable = ['nombre', 'descripcion', 'dia', 'nivel'];
 
     public function ejercicios()
@@ -34,13 +39,19 @@ class Rutina extends Model
         return $query->where('nivel', $nivel);
     }
 
-    // Scope: obtener rutinas del día actual
+    // Scope: obtener rutinas del día actual (usa dayOfWeekIso para evitar issues de locale)
     public function scopeHoy($query)
     {
-        $diaHoy = Carbon::now()->locale('es')->translatedFormat('l'); // devuelve e.g. 'lunes' o 'Lunes' según locale
-        // Normalizar a primera letra mayúscula para coincidir con enum
-        $diaHoy = ucfirst(mb_strtolower($diaHoy));
-        // Ajuste: en algunos entornos 'Wednesday' traducido a 'miércoles' con tilde; usamos ucfirst con mb_strtolower
+        $days = [
+            1 => 'Lunes',
+            2 => 'Martes',
+            3 => 'Miércoles',
+            4 => 'Jueves',
+            5 => 'Viernes',
+            6 => 'Sábado',
+            7 => 'Domingo',
+        ];
+        $diaHoy = $days[Carbon::now()->dayOfWeekIso];
         return $query->where('dia', $diaHoy);
     }
 }
