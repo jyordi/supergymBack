@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RutinaController;
+use App\Http\Controllers\HistorialController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -73,4 +74,12 @@ Route::prefix('api')->withoutMiddleware('web')->group(function () {
     Route::post('/logout', [UserController::class, 'logout']);
     Route::put('/usuarios/{id}', [UserController::class, 'update']);
     Route::delete('/usuarios/{id}', [UserController::class, 'destroy']);
+
+    // Historial de rutinas
+    Route::get('/historials', [HistorialController::class, 'index']);
+    Route::get('/historials/{id}', [HistorialController::class, 'show']);
+    Route::post('/historials', [HistorialController::class, 'store']);
+    Route::put('/historials/{id}', [HistorialController::class, 'update']);
+    Route::delete('/historials/{id}', [HistorialController::class, 'destroy']);
+    Route::get('/historials/user/{user_id}', [HistorialController::class, 'byUser']);
 });
