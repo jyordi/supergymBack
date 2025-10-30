@@ -7,62 +7,39 @@ use Illuminate\Http\Request;
 
 class HistorialController extends Controller
 {
-    // Listar todos los registros de historial
-    public function index()
-    {
-        return response()->json(Historial::with(['user','rutina'])->get());
-    }
+    public function index() { return response()->json(Historial::with(['user','rutina'])->get()); }
 
-    // Mostrar un registro
     public function show($id)
     {
         $h = Historial::with(['user','rutina'])->find($id);
-        if (!$h) return response()->json(['error' => 'Registro no encontrado'], 404);
+        if (!$h) return response()->json(['error'=>'Registro no encontrado'],404);
         return response()->json($h);
     }
 
-    // Crear un registro de historial
     public function store(Request $req)
     {
         $data = $req->validate([
-            'user_id' => 'required|exists:users,id',
-            'rutina_id' => 'required|exists:rutinas,id',
-            'fecha_realizacion' => 'nullable|date',
-            'completada' => 'sometimes|boolean',
+            'user_id'=>'required|exists:users,id',
+            'rutina_id'=>'required|exists:rutinas,id',
+            'fecha_realizacion'=>'nullable|date',
+            'completada'=>'sometimes|boolean'
         ]);
-
         $h = Historial::create($data);
-        return response()->json($h->load(['user','rutina']), 201);
+        return response()->json($h->load(['user','rutina']),201);
     }
 
-    // Actualizar (por ejemplo marcar completada)
     public function update(Request $req, $id)
     {
-        $h = Historial::find($id);
-        if (!$h) return response()->json(['error' => 'Registro no encontrado'], 404);
-
-        $data = $req->validate([
-            'fecha_realizacion' => 'nullable|date',
-            'completada' => 'sometimes|boolean',
-        ]);
-
-        $h->update($data);
-        return response()->json($h->load(['user','rutina']));
+        $h = Historial::find($id); if (!$h) return response()->json(['error'=>'Registro no encontrado'],404);
+        $data = $req->validate(['fecha_realizacion'=>'nullable|date','completada'=>'sometimes|boolean']);
+        $h->update($data); return response()->json($h->load(['user','rutina']));
     }
 
-    // Eliminar registro
     public function destroy($id)
     {
-        $h = Historial::find($id);
-        if (!$h) return response()->json(['error' => 'Registro no encontrado'], 404);
-        $h->delete();
-        return response()->json(['message' => 'Registro eliminado']);
+        $h = Historial::find($id); if (!$h) return response()->json(['error'=>'Registro no encontrado'],404);
+        $h->delete(); return response()->json(['message'=>'Registro eliminado']);
     }
 
-    // Listar historial por usuario
-    public function byUser($user_id)
-    {
-        $list = Historial::with('rutina')->where('user_id', $user_id)->get();
-        return response()->json($list);
-    }
+    public function byUser($user_id) { return response()->json(Historial::with('rutina')->where('user_id',$user_id)->get()); }
 }
