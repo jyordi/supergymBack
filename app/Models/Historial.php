@@ -21,13 +21,6 @@ class Historial extends Model
         'completada' => 'boolean',
     ];
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public function rutina()
-    {
-        return $this->belongsTo(Rutina::class);
-    }
+    public function user() { return $this->belongsTo(User::class); }
+    public function rutina() { return $this->belongsTo(Rutina::class); }
 }

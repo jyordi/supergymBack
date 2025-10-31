@@ -10,195 +10,100 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class UserController extends Controller
 {
-    // Registrar usuario - USANDO 'nombre'
-    public function register(Request $request)
+    // Registrar
+    public function register(Request $req)
     {
-        try {
-            $validated = $request->validate([
-                'nombre' => 'required|string|max:255', 
-                'email' => 'required|email|unique:users',
-                'password' => 'required|min:6',
-                'numero_usuario' => 'required|unique:users',
-                'edad' => 'nullable|integer',
-                'sexo' => 'nullable|in:M,F,Otro',
-                'peso' => 'nullable|numeric',
-                'altura' => 'nullable|numeric',
-                'nivel_conocimiento' => 'nullable|in:Principiante,Intermedio,Avanzado',
-                'objetivo' => 'nullable|in:Perder peso,Ganar músculo,Tonificación',
-                'tipo_usuario' => 'nullable|in:Registrado,Invitado,Admin'
-            ]);
+        $data = $req->validate([
+            'nombre' => 'required|string',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:6|confirmed',
+            'numero_usuario' => 'required|unique:users'
+        ]);
 
-            $userData = [
-                'nombre' => $validated['nombre'], // ← Cambiado a 'nombre'
-                'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
-                'numero_usuario' => $validated['numero_usuario']
-            ];
+        $data['password'] = Hash::make($data['password']);
+        $user = User::create($data);
+        $token = JWTAuth::fromUser($user);
 
-            // Agregar campos opcionales si están presentes
-            $optionalFields = ['edad', 'sexo', 'peso', 'altura', 'nivel_conocimiento', 'objetivo', 'tipo_usuario'];
-            foreach ($optionalFields as $field) {
-                if (isset($validated[$field])) {
-                    $userData[$field] = $validated[$field];
-                }
-            }
-
-            $user = User::create($userData);
-            $token = JWTAuth::fromUser($user);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Usuario registrado exitosamente',
-                'user' => $user,
-                'token' => $token
-            ], 201);
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'errors' => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al registrar usuario: ' . $e->getMessage()
-            ], 500);
-        }
+        return response()->json(['user' => $user, 'token' => $token], 201);
     }
 
-    // Login usuario
-    public function login(Request $request)
+    // Login
+    public function login(Request $req)
     {
-        try {
-            $credentials = $request->only('numero_usuario', 'password');
+        $credentials = $req->only('numero_usuario', 'password');
 
+        try {
             if (!$token = JWTAuth::attempt($credentials)) {
-                return response()->json([
-                    'success' => false,
-                    'error' => 'Credenciales inválidas'
-                ], 401);
+                return response()->json(['error' => 'Credenciales inválidas'], 401);
             }
-
-            $user = JWTAuth::user();
-
-            return response()->json([
-                'success' => true,
-                'token' => $token,
-                'user' => $user
-            ]);
-
         } catch (JWTException $e) {
-            return response()->json([
-                'success' => false,
-                'error' => 'No se pudo crear el token'
-            ], 500);
+            return response()->json(['error' => 'No se pudo crear el token'], 500);
         }
+
+        $user = JWTAuth::user();
+        return response()->json(['token' => $token, 'user' => $user]);
     }
 
-    // Logout usuario
+    // Logout
     public function logout()
     {
         try {
             JWTAuth::invalidate(JWTAuth::getToken());
-            return response()->json([
-                'success' => true,
-                'message' => 'Sesión cerrada exitosamente'
-            ]);
+            return response()->json(['message' => 'Sesión cerrada']);
         } catch (JWTException $e) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Error al cerrar sesión'
-            ], 500);
+            return response()->json(['error' => 'Error al cerrar sesión'], 500);
+        }
+    }
+
+    // Perfil actual
+    public function me()
+    {
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+            return response()->json($user);
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Usuario no autenticado'], 401);
         }
     }
 
     // Listar usuarios
     public function index()
     {
-        $users = User::all();
-        return response()->json([
-            'success' => true,
-            'users' => $users
-        ]);
+        return response()->json(User::all());
     }
 
-    // Mostrar usuario específico
+    // Mostrar usuario
     public function show($id)
     {
-        $user = User::find($id);
-        
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Usuario no encontrado'
-            ], 404);
-        }
-
-        return response()->json([
-            'success' => true,
-            'user' => $user
-        ]);
+        $u = User::find($id);
+        if (!$u) return response()->json(['error' => 'Usuario no encontrado'], 404);
+        return response()->json($u);
     }
 
     // Actualizar usuario
-    public function update(Request $request, $id)
+    public function update(Request $req, $id)
     {
-        try {
-            $user = User::find($id);
-            
-            if (!$user) {
-                return response()->json([
-                    'success' => false,
-                    'error' => 'Usuario no encontrado'
-                ], 404);
-            }
+        $user = User::find($id);
+        if (!$user) return response()->json(['error' => 'Usuario no encontrado'], 404);
 
-            $validated = $request->validate([
-                'nombre' => 'sometimes|string|max:255', // ← Cambiado a 'nombre'
-                'email' => 'sometimes|email|unique:users,email,' . $id,
-                'numero_usuario' => 'sometimes|unique:users,numero_usuario,' . $id,
-                'edad' => 'nullable|integer',
-                'sexo' => 'nullable|in:M,F,Otro',
-                'peso' => 'nullable|numeric',
-                'altura' => 'nullable|numeric',
-                'nivel_conocimiento' => 'nullable|in:Principiante,Intermedio,Avanzado',
-                'objetivo' => 'nullable|in:Perder peso,Ganar músculo,Tonificación',
-                'tipo_usuario' => 'nullable|in:Registrado,Invitado,Admin'
-            ]);
+        $data = $req->validate([
+            'nombre' => 'sometimes|string',
+            'email' => 'sometimes|email|unique:users,email,'.$user->id,
+            'password' => 'sometimes|min:6|confirmed',
+            'numero_usuario' => 'sometimes|unique:users,numero_usuario,'.$user->id
+        ]);
 
-            $user->update($validated);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Usuario actualizado exitosamente',
-                'user' => $user
-            ]);
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'errors' => $e->errors()
-            ], 422);
-        }
+        if (isset($data['password'])) $data['password'] = Hash::make($data['password']);
+        $user->update($data);
+        return response()->json($user);
     }
 
     // Eliminar usuario
     public function destroy($id)
     {
-        $user = User::find($id);
-        
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Usuario no encontrado'
-            ], 404);
-        }
-
-        $user->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Usuario eliminado exitosamente'
-        ]);
+        $u = User::find($id);
+        if (!$u) return response()->json(['error' => 'Usuario no encontrado'], 404);
+        $u->delete();
+        return response()->json(['message' => 'Usuario eliminado']);
     }
 }

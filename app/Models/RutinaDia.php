@@ -10,7 +10,6 @@ class RutinaDia extends Model
     use HasFactory;
 
     protected $table = 'rutina_dias';
-
     protected $fillable = ['rutina_id', 'dia', 'nivel'];
 
     public function rutina()

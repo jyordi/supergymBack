@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('historials', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('rutina_id')->constrained('rutinas')->onDelete('cascade');
             $table->timestamp('fecha_realizacion')->nullable();
             $table->boolean('completada')->default(false);

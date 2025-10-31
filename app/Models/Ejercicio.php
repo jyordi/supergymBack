@@ -9,7 +9,7 @@ class Ejercicio extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nombre', 'descripcion']; // ajusta campos según tu migración
+    protected $fillable = ['nombre', 'descripcion'];
 
     public function rutinas()
     {
