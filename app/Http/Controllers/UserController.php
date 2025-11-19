@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 
+
+
 class UserController extends Controller
 {
     // Registrar
