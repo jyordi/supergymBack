@@ -9,6 +9,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+<<<<<<< HEAD
 // RUTINAS
 Route::get('/rutinas', [RutinaController::class, 'index']);
 Route::get('/rutinas/{id}', [RutinaController::class, 'show']);
@@ -83,3 +84,10 @@ Route::prefix('api')->withoutMiddleware('web')->group(function () {
     Route::delete('/historials/{id}', [HistorialController::class, 'destroy']);
     Route::get('/historials/user/{user_id}', [HistorialController::class, 'byUser']);
 });
+=======
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware('auth');
+
+
+>>>>>>> raamses
