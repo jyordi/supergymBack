@@ -21,7 +21,7 @@ return new class extends Migration
         Schema::create('rutina_dia_ejercicio', function (Blueprint $table) {
             $table->id();
             $table->foreignId('rutina_dia_id')->constrained('rutina_dias')->onDelete('cascade');
-            $table->foreignId('ejercicio_id')->constrained('ejercicios')->onDelete('cascade');
+            $table->foreignId('ejercicio_id')->constrained('exercises')->onDelete('cascade');
             $table->integer('series')->default(3);
             $table->string('repeticiones')->default('12');
             $table->timestamps();

@@ -4,90 +4,100 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RutinaController;
 use App\Http\Controllers\HistorialController;
+use App\Http\Controllers\ExerciseController;
+// Necesario para la excepción en línea
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken; 
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-<<<<<<< HEAD
-// RUTINAS
-Route::get('/rutinas', [RutinaController::class, 'index']);
-Route::get('/rutinas/{id}', [RutinaController::class, 'show']);
-Route::post('/rutinas', [RutinaController::class, 'store']);
-Route::put('/rutinas/{id}', [RutinaController::class, 'update']);
-Route::delete('/rutinas/{id}', [RutinaController::class, 'destroy']);
 
-// Obtener rutinas del día actual
-Route::get('/rutinas/hoy', [RutinaController::class, 'hoy']);
 
-// Obtener rutinas por día (ej: /rutinas/dia/Martes)
-// Opcional: /rutinas/dia/Martes?nivel=Avanzado
-Route::get('/rutinas/dia/{dia}', [RutinaController::class, 'porDia']);
-
-// Asignar ejercicio a rutina (pivot rutina_ejercicio)
-// POST /rutinas/{rutina_id}/ejercicios
-/*
-Body JSON:
-{
-  "ejercicio_id": 5,
-  "series": 4,
-  "repeticiones": "10-12"
-}
-*/
-Route::post('/rutinas/{rutina_id}/ejercicios', [RutinaController::class, 'addEjercicio']);
-
-// Asignar ejercicio a rutina en día (pivot rutina_dia_ejercicio)
-// POST /rutinas/dia/{rutina_dia_id}/ejercicios
-/*
-Body JSON:
-{
-  "ejercicio_id": 5,
-  "series": 4,
-  "repeticiones": "10-12"
-}
-*/
-Route::post('/rutinas/dia/{rutina_dia_id}/ejercicios', [RutinaController::class, 'addEjercicioADia']);
-
-// Eliminar ejercicio de un día concreto
-Route::delete('/rutinas/dia/{rutina_dia_id}/ejercicios/{ejercicio_id}', [RutinaController::class, 'removeEjercicioDeDia']);
-
-// Crear entrada día para una rutina
-// POST /rutinas/{rutina_id}/dias
-// Body JSON: { "dia":"Lunes", "nivel":"Intermedio" }
-Route::post('/rutinas/{rutina_id}/dias', [RutinaController::class, 'storeDia']);
-
-// Actualizar entrada día
-// PUT /rutinas/dia/{rutina_dia_id}
-// Body JSON: { "dia":"Martes", "nivel":"Avanzado" }
-Route::put('/rutinas/dia/{rutina_dia_id}', [RutinaController::class, 'updateDia']);
-
-// Eliminar entrada día
-// DELETE /rutinas/dia/{rutina_dia_id}
-Route::delete('/rutinas/dia/{rutina_dia_id}', [RutinaController::class, 'destroyDia']);
-
-// RUTAS DE USUARIOS (ejemplo existentes)
-// Grupo de rutas API sin middleware web
+// ==========================================
+// GRUPO API (SIN MIDDLEWARE WEB)
+// ==========================================
+// ... (El resto de tu código sigue igual) ...
 Route::prefix('api')->withoutMiddleware('web')->group(function () {
-    Route::get('/usuarios', [UserController::class, 'index']);
+    // ... tus rutas de api ...
+     Route::get('/usuarios', [UserController::class, 'index']);
+    Route::post('/usuarios', [UserController::class, 'store']); // Antes era 'register', ahora apunta a 'store'
     Route::get('/usuarios/{id}', [UserController::class, 'show']);
-    Route::post('/usuarios', [UserController::class, 'register']);
-    Route::post('/login', [UserController::class, 'login']);
-    Route::post('/logout', [UserController::class, 'logout']);
     Route::put('/usuarios/{id}', [UserController::class, 'update']);
     Route::delete('/usuarios/{id}', [UserController::class, 'destroy']);
 
-    // Historial de rutinas
+    // Nota: Si deseas mantener login/logout, debes agregar esos métodos a tu UserController
+    // Route::post('/login', [UserController::class, 'login']);
+    // Route::post('/logout', [UserController::class, 'logout']);
+
+    // --- HISTORIAL DE RUTINAS ---
     Route::get('/historials', [HistorialController::class, 'index']);
     Route::get('/historials/{id}', [HistorialController::class, 'show']);
     Route::post('/historials', [HistorialController::class, 'store']);
     Route::put('/historials/{id}', [HistorialController::class, 'update']);
     Route::delete('/historials/{id}', [HistorialController::class, 'destroy']);
     Route::get('/historials/user/{user_id}', [HistorialController::class, 'byUser']);
+
+    // --- EJERCICIOS (ExerciseController) ---
+    // Listar todos los ejercicios
+    Route::get('/exercises', [ExerciseController::class, 'index']);
+    
+    // Ver un ejercicio específico
+    Route::get('/exercises/{id}', [ExerciseController::class, 'show']);
+    
+    // Importación masiva de ejercicios (Para usar con el JSON)
+    Route::post('/exercises/import', [ExerciseController::class, 'import']);
+    
+    // Eliminar ejercicio
+    Route::delete('/exercises/{id}', [ExerciseController::class, 'destroy']);
+
+
+
+
+    // ==========================================
+// RUTAS DE RUTINAS
+// ==========================================
+
+// IMPORTANTE: Esta ruta debe ir ANTES de las rutas con {id}
+// SOLUCIÓN AQUÍ: Le quitamos el middleware CSRF solo a esta ruta
+Route::post('/rutinas/importar-masivo', [RutinaController::class, 'importarMasivo'])
+    ->withoutMiddleware([VerifyCsrfToken::class]);
+
+Route::get('/rutinas', [RutinaController::class, 'index']);
+Route::get('/rutinas/{id}', [RutinaController::class, 'show']);
+
+// A estas también deberías quitarle el middleware si vas a probarlas con Postman
+Route::post('/rutinas', [RutinaController::class, 'store'])
+    ->withoutMiddleware([VerifyCsrfToken::class]);
+
+Route::put('/rutinas/{id}', [RutinaController::class, 'update'])
+    ->withoutMiddleware([VerifyCsrfToken::class]);
+
+Route::delete('/rutinas/{id}', [RutinaController::class, 'destroy'])
+    ->withoutMiddleware([VerifyCsrfToken::class]);
+
+
+// ... (Resto de tus rutas GET que no necesitan cambios) ...
+Route::get('/rutinas/hoy', [RutinaController::class, 'hoy']);
+Route::get('/rutinas/dia/{dia}', [RutinaController::class, 'porDia']);
+
+// Rutas POST/DELETE adicionales (también necesitan la excepción para Postman)
+Route::post('/rutinas/{rutina_id}/ejercicios', [RutinaController::class, 'addEjercicio'])
+    ->withoutMiddleware([VerifyCsrfToken::class]);
+
+Route::post('/rutinas/dia/{rutina_dia_id}/ejercicios', [RutinaController::class, 'addEjercicioADia'])
+    ->withoutMiddleware([VerifyCsrfToken::class]);
+
+Route::delete('/rutinas/dia/{rutina_dia_id}/ejercicios/{ejercicio_id}', [RutinaController::class, 'removeEjercicioDeDia'])
+    ->withoutMiddleware([VerifyCsrfToken::class]);
+
+Route::post('/rutinas/{rutina_id}/dias', [RutinaController::class, 'storeDia'])
+    ->withoutMiddleware([VerifyCsrfToken::class]);
+
+Route::put('/rutinas/dia/{rutina_dia_id}', [RutinaController::class, 'updateDia'])
+    ->withoutMiddleware([VerifyCsrfToken::class]);
+
+Route::delete('/rutinas/dia/{rutina_dia_id}', [RutinaController::class, 'destroyDia'])
+    ->withoutMiddleware([VerifyCsrfToken::class]);
+
 });
-=======
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware('auth');
-
-
->>>>>>> raamses

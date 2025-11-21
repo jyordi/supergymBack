@@ -12,6 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         //
+        // Agrega esta línea para permitir peticiones desde Postman a estas rutas
+        $middleware->validateCsrfTokens(except: [
+            'rutinas/*', // Esto desbloquea importar, crear, editar y borrar rutinas
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

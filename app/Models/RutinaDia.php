@@ -17,10 +17,17 @@ class RutinaDia extends Model
         return $this->belongsTo(Rutina::class);
     }
 
-    public function ejercicios()
+    // CAMBIO IMPORTANTE: Renombramos de 'ejercicios' a 'exercises'
+    // para que coincida con lo que busca tu controlador.
+    public function exercises()
     {
-        return $this->belongsToMany(Ejercicio::class, 'rutina_dia_ejercicio', 'rutina_dia_id', 'ejercicio_id')
-            ->withPivot('series', 'repeticiones')
-            ->withTimestamps();
+        return $this->belongsToMany(
+            Exercise::class,           // Modelo destino
+            'rutina_dia_ejercicio',    // Tabla pivote (en español en tu BD)
+            'rutina_dia_id',           // FK de este modelo en pivote
+            'ejercicio_id'             // FK del otro modelo en pivote (ejercicios)
+        )
+        ->withPivot('series', 'repeticiones')
+        ->withTimestamps();
     }
 }
