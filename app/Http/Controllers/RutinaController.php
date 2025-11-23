@@ -189,13 +189,18 @@ class RutinaController extends Controller
             'dias' => function ($q) use ($dia, $nivel) {
                 $q->where('dia', $dia)
                   ->where('nivel', $nivel)
-                  ->with('exercises');
+                  ->with([
+                      'exercises.images',        // ← AÑADIDO
+                      'exercises.instructions',  // ← AÑADIDO
+                      'exercises'                // base
+                  ]);
             }
         ])
         ->get();
 
     return response()->json($rutinas);
 }
+
 
     
     /**
