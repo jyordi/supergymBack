@@ -55,7 +55,7 @@ class RutinaController extends Controller
     }
 
     /**
-     * Eliminar rutina (Elimina en cascada días y relaciones gracias a la BD)
+     * Eliminar rutina
      */
     public function destroy($id)
     {
@@ -72,7 +72,6 @@ class RutinaController extends Controller
      */
     public function hoy()
     {
-        // Mapeo de días en Inglés (Carbon) a tu Enum en Español
         $mapaDias = [
             'Monday'    => 'Lunes',
             'Tuesday'   => 'Martes',
@@ -86,13 +85,11 @@ class RutinaController extends Controller
         $diaIngles = Carbon::now()->format('l');
         $diaEspanol = $mapaDias[$diaIngles];
 
-        // Buscar rutinas asignadas a este día O rutinas que tengan un sub-día asignado a hoy
         $rutinas = Rutina::where('dia', $diaEspanol)
                     ->orWhereHas('dias', function($q) use ($diaEspanol) {
                         $q->where('dia', $diaEspanol);
                     })
                     ->with(['dias' => function($q) use ($diaEspanol) {
-                        // Cargar solo los sub-días que coinciden con hoy
                         $q->where('dia', $diaEspanol)->with('exercises');
                     }, 'exercises'])
                     ->get();
@@ -117,12 +114,18 @@ class RutinaController extends Controller
         return response()->json($rutinas);
     }
 
+    /**
+     * NUEVO MÉTODO: Buscar rutinas por Nivel Y Día específico
+     * Ejemplo uso: /rutinas/buscar/Intermedio/Lunes
+     */
+    
+
     // ==========================================
     // GESTIÓN DE EJERCICIOS Y DÍAS
     // ==========================================
 
     /**
-     * Asignar ejercicio directamente a la rutina (Tabla: rutina_ejercicio)
+     * Asignar ejercicio directamente a la rutina
      */
     public function addEjercicio(Request $request, $rutina_id)
     {
@@ -145,7 +148,7 @@ class RutinaController extends Controller
     }
 
     /**
-     * Crear un sub-día para una rutina (Tabla: rutina_dias)
+     * Crear un sub-día para una rutina
      */
     public function storeDia(Request $request, $rutina_id)
     {
@@ -163,8 +166,40 @@ class RutinaController extends Controller
         return response()->json($rutinaDia, 201);
     }
 
+
+    public function buscarPorNivelYDia($nivel, $dia)
+{
+    // Normalizar
+    $nivel = ucfirst(strtolower($nivel));
+    $dia = ucfirst(strtolower($dia));
+
+    $nivelesValidos = ['Principiante', 'Intermedio', 'Avanzado'];
+    $diasValidos = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+
+    if (!in_array($nivel, $nivelesValidos) || !in_array($dia, $diasValidos)) {
+        return response()->json(['error' => 'Nivel o día no válido'], 400);
+    }
+
+    $rutinas = Rutina::where('nivel', $nivel)
+        ->whereHas('dias', function ($q) use ($dia, $nivel) {
+            $q->where('dia', $dia)
+              ->where('nivel', $nivel);
+        })
+        ->with([
+            'dias' => function ($q) use ($dia, $nivel) {
+                $q->where('dia', $dia)
+                  ->where('nivel', $nivel)
+                  ->with('exercises');
+            }
+        ])
+        ->get();
+
+    return response()->json($rutinas);
+}
+
+    
     /**
-     * Asignar ejercicio a un sub-día (Tabla: rutina_dia_ejercicio)
+     * Asignar ejercicio a un sub-día
      */
     public function addEjercicioADia(Request $request, $rutina_dia_id)
     {
@@ -212,11 +247,10 @@ class RutinaController extends Controller
 
     public function importarMasivo(Request $request)
     {
-        // Se espera un JSON con array de rutinas
         $data = $request->validate([
             '*.nombre' => 'required|string',
             '*.nivel' => 'required|string',
-            '*.dias' => 'nullable|array' // Array de sub-dias
+            '*.dias' => 'nullable|array'
         ]);
 
         try {
@@ -227,22 +261,21 @@ class RutinaController extends Controller
                 $rutina = Rutina::create([
                     'nombre' => $item['nombre'],
                     'descripcion' => $item['descripcion'] ?? null,
-                    'dia' => $item['dia'] ?? null, // Si la rutina entera es para un día
-                    'nivel' => ucfirst(strtolower($item['nivel'])) // Asegurar formato Enum
+                    'dia' => $item['dia'] ?? null,
+                    'nivel' => ucfirst(strtolower($item['nivel']))
                 ]);
 
-                // Si trae días anidados con ejercicios
                 if (isset($item['dias']) && is_array($item['dias'])) {
                     foreach ($item['dias'] as $diaData) {
                         $rutinaDia = RutinaDia::create([
                             'rutina_id' => $rutina->id,
-                            'dia' => $diaData['dia'], // "Lunes", etc
+                            'dia' => $diaData['dia'],
                             'nivel' => $diaData['nivel'] ?? null
                         ]);
 
                         if (isset($diaData['ejercicios']) && is_array($diaData['ejercicios'])) {
                             foreach ($diaData['ejercicios'] as $ejercicioData) {
-                                // Buscamos el ejercicio por nombre si viene así en el JSON, o por ID
+                                // Buscar por nombre exacto
                                 $ejercicio = Exercise::where('name', $ejercicioData['nombre'])->first();
                                 
                                 if ($ejercicio) {

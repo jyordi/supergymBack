@@ -81,6 +81,10 @@ Route::delete('/rutinas/{id}', [RutinaController::class, 'destroy'])
 Route::get('/rutinas/hoy', [RutinaController::class, 'hoy']);
 Route::get('/rutinas/dia/{dia}', [RutinaController::class, 'porDia']);
 
+// Obtener rutinas por nivel y día
+Route::get('/rutinas/buscar/{nivel}/{dia}', [RutinaController::class, 'buscarPorNivelYDia']);
+
+
 // Rutas POST/DELETE adicionales (también necesitan la excepción para Postman)
 Route::post('/rutinas/{rutina_id}/ejercicios', [RutinaController::class, 'addEjercicio'])
     ->withoutMiddleware([VerifyCsrfToken::class]);
