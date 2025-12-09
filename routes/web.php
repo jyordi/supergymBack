@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\StatsController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RutinaController;
@@ -20,11 +21,24 @@ Route::get('/', function () {
 // ... (El resto de tu código sigue igual) ...
 Route::prefix('api')->withoutMiddleware('web')->group(function () {
     // ... tus rutas de api ...
+    // Agrega estas líneas específicas para Auth
+Route::post('/register', [UserController::class, 'register']);
+Route::post('/login', [UserController::class, 'login']);
+
+// Rutas de recuperación
+// routes/api.php
+Route::post('forgot-password', [UserController::class, 'forgotPassword']);
+Route::post('reset-password', [UserController::class, 'resetPassword']);
+
+
+    Route::get('/users/{id}', [UserController::class, 'show']);
      Route::get('/usuarios', [UserController::class, 'index']);
     Route::post('/usuarios', [UserController::class, 'store']); // Antes era 'register', ahora apunta a 'store'
     Route::get('/usuarios/{id}', [UserController::class, 'show']);
     Route::put('/usuarios/{id}', [UserController::class, 'update']);
     Route::delete('/usuarios/{id}', [UserController::class, 'destroy']);
+    Route::post('/users/{id}/actualizar', [UserController::class, 'actualizarDatos']);
+    Route::post('/users/{id}/avatar', [UserController::class, 'actualizarAvatar']);
 
     // Nota: Si deseas mantener login/logout, debes agregar esos métodos a tu UserController
     // Route::post('/login', [UserController::class, 'login']);
@@ -104,4 +118,10 @@ Route::put('/rutinas/dia/{rutina_dia_id}', [RutinaController::class, 'updateDia'
 Route::delete('/rutinas/dia/{rutina_dia_id}', [RutinaController::class, 'destroyDia'])
     ->withoutMiddleware([VerifyCsrfToken::class]);
 
+
+// Guardar al terminar la rutina
+Route::post('/historial', [StatsController::class, 'store']);
+
+// Obtener datos para el dashboard (home)
+Route::get('/historial/stats/{user_id}', [StatsController::class, 'getStats']);
 });

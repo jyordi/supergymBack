@@ -14,6 +14,7 @@ class CreateUsersTable extends Migration
             // Datos personales
             $table->string('nombre');
             $table->string('email')->unique();
+            $table->string('avatar')->nullable()->after('email'); 
             $table->timestamp('email_verified_at')->nullable();
 
             // Credenciales
