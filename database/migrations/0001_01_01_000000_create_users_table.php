@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,7 +15,10 @@ class CreateUsersTable extends Migration
             // Datos personales
             $table->string('nombre');
             $table->string('email')->unique();
-            $table->string('avatar')->nullable()->after('email'); 
+            
+            // CORREGIDO: Se eliminó ->after('email')
+            $table->string('avatar')->nullable(); 
+            
             $table->timestamp('email_verified_at')->nullable();
 
             // Credenciales
