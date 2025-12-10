@@ -89,54 +89,61 @@ class UserController extends Controller
      * Actualizar datos del usuario y registrar progreso
      */
     public function actualizarDatos(Request $request, $id)
-{
-    try {
-        // 1. Validar
-        $request->validate([
-            'peso' => 'required',
-            'altura' => 'required',
-        ]);
+    {
+        try {
+            // 1. Validar
+            $request->validate([
+                'peso' => 'required',
+                'altura' => 'required',
+                // 'edad' => 'nullable|integer', // Puedes agregar validación si quieres
+            ]);
 
-        // 2. Buscar Usuario
-        $user = User::findOrFail($id);
+            // 2. Buscar Usuario
+            $user = User::findOrFail($id);
 
-        // 3. Actualizar Usuario
-        $user->peso = $request->peso;
-        $user->altura = $request->altura;
-        if($request->has('nivel_conocimiento')) {
-            $user->nivel_conocimiento = $request->nivel_conocimiento;
+            // 3. Actualizar Usuario
+            $user->peso = $request->peso;
+            $user->altura = $request->altura;
+
+            // --- AGREGAR ESTO ---
+            if($request->has('edad')) {
+                $user->edad = $request->edad;
+            }
+            // --------------------
+
+            if($request->has('nivel_conocimiento')) {
+                $user->nivel_conocimiento = $request->nivel_conocimiento;
+            }
+            
+            $user->save(); // <--- Aquí se guardan los cambios en la tabla 'users'
+
+            // 4. Crear Progreso (Historial)
+            $progreso = new UserProgress();
+            $progreso->user_id = $user->id;
+            $progreso->peso = $request->peso;
+            $progreso->altura = $request->altura;
+            
+            if($request->has('cintura')) $progreso->cintura = $request->cintura;
+
+            // 5. Guardar Foto
+            if ($request->hasFile('foto')) {
+                $path = $request->file('foto')->store('progress', 'public');
+                $progreso->foto_path = url('storage/' . $path);
+            }
+
+            $progreso->save();
+
+            return response()->json(['success' => true, 'message' => 'Actualizado correctamente']);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'ERROR DE LARAVEL: ' . $e->getMessage(),
+                'linea' => $e->getLine(),
+                'archivo' => $e->getFile()
+            ], 500);
         }
-        $user->save();
-
-        // 4. Crear Progreso
-        $progreso = new UserProgress();
-        $progreso->user_id = $user->id;
-        $progreso->peso = $request->peso;
-        $progreso->altura = $request->altura;
-        
-        if($request->has('cintura')) $progreso->cintura = $request->cintura;
-
-        // 5. Guardar Foto
-        if ($request->hasFile('foto')) {
-            // Asegúrate de correr: php artisan storage:link
-            $path = $request->file('foto')->store('progress', 'public');
-            $progreso->foto_path = url('storage/' . $path);
-        }
-
-        $progreso->save();
-
-        return response()->json(['success' => true, 'message' => 'Actualizado correctamente']);
-
-    } catch (\Exception $e) {
-        // 🚨 ESTA PARTE ES LA QUE TE DIRÁ EL ERROR 🚨
-        return response()->json([
-            'success' => false,
-            'message' => 'ERROR DE LARAVEL: ' . $e->getMessage(),
-            'linea' => $e->getLine(),
-            'archivo' => $e->getFile()
-        ], 500);
     }
-}
 
     /**
      * Actualizar avatar (foto de perfil) del usuario
