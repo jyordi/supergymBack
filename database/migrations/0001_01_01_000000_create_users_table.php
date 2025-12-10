@@ -22,6 +22,7 @@ class CreateUsersTable extends Migration
 
             // Opcionales
             $table->integer('edad')->nullable();
+            
             $table->enum('sexo', ['M', 'F', 'Otro'])->nullable();
             $table->decimal('peso', 5, 2)->nullable();   // ej. 999.99
             $table->decimal('altura', 5, 2)->nullable(); // ej. 250.00
