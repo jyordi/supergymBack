@@ -16,13 +16,15 @@ class User extends Authenticatable implements JWTSubject
         'email', 
         'password',
         'numero_usuario',
+        'fecha_nacimiento', 
         'edad',
         'sexo', 
         'peso',
         'altura',
         'nivel_conocimiento',
         'objetivo',
-        'tipo_usuario'
+        'tipo_usuario',
+        'avatar' 
     ];
 
     protected $hidden = [
@@ -30,19 +32,14 @@ class User extends Authenticatable implements JWTSubject
         'remember_token',
     ];
 
-    // JWTSubject
-    public function getJWTIdentifier()
-    {
-        return $this->getKey();
-    }
-
-    public function getJWTCustomClaims()
-    {
-        return [];
-    }
-
+    
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'fecha_nacimiento' => 'date', 
     ];
+
+  
+    public function getJWTIdentifier() { return $this->getKey(); }
+    public function getJWTCustomClaims() { return []; }
 }

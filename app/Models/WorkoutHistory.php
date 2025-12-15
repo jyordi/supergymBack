@@ -17,6 +17,7 @@ class WorkoutHistory extends Model
         'calories',
         'difficulty',
         'completed_date'
+        
     ];
 
     // Relación inversa (opcional)

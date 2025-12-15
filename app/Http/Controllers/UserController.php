@@ -95,7 +95,7 @@ class UserController extends Controller
             $request->validate([
                 'peso' => 'required',
                 'altura' => 'required',
-                // 'edad' => 'nullable|integer', // Puedes agregar validación si quieres
+                'edad' => 'nullable|integer', 
             ]);
 
             // 2. Buscar Usuario
@@ -143,6 +143,39 @@ class UserController extends Controller
                 'archivo' => $e->getFile()
             ], 500);
         }
+    }
+
+
+    public function getProgressHistory($id)
+    {
+        // 1. Buscar registros del usuario, ordenados por fecha (antiguo -> nuevo)
+        $progress = UserProgress::where('user_id', $id)
+            ->select('peso', 'cintura', 'created_at') // Solo traemos lo útil
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        // 2. Si no hay datos, devolvemos un array vacío pero con success true
+        if ($progress->isEmpty()) {
+            return response()->json([
+                'success' => true,
+                'history' => [],
+                'message' => 'No hay registros de progreso para este usuario.'
+            ]);
+        }
+
+        // 3. Formatear datos para la gráfica (Fecha bonita: "15 Dic")
+        $data = $progress->map(function ($item) {
+            return [
+                'fecha' => Carbon::parse($item->created_at)->format('d/m'), // Día/Mes
+                'peso' => (float)$item->peso,       // Asegurar que sea número
+                'cintura' => (float)$item->cintura  // Asegurar que sea número
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'history' => $data
+        ]);
     }
 
     /**
@@ -298,27 +331,35 @@ class UserController extends Controller
         // 1. Validar datos
         $validator = Validator::make($request->all(), [
             'nombre' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users', // Esto evita el error de email duplicado
+            'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6',
+            'fecha_nacimiento' => 'nullable|date',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
         }
 
-        // 2. Generar numero_usuario si no viene (Usa timestamp + random)
         $numUsuario = $request->numero_usuario ?? 'USER-' . time() . rand(100,999);
 
-        // 3. Crear usuario
+        // Calcular edad si viene fecha de nacimiento y no viene edad explicita
+        $edad = $request->edad;
+        if (!$edad && $request->has('fecha_nacimiento')) {
+            $edad = Carbon::parse($request->fecha_nacimiento)->age;
+        }
+
         try {
             $user = User::create([
                 'nombre' => $request->nombre,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'numero_usuario' => $numUsuario, // <--- AQUÍ LA CORRECCIÓN
+                'numero_usuario' => $numUsuario,
+                'fecha_nacimiento' => $request->fecha_nacimiento,
+                'edad' => $edad,
                 'nivel_conocimiento' => $request->nivel_conocimiento ?? 'Principiante',
                 'peso' => $request->peso,
                 'altura' => $request->altura,
+                'sexo' => $request->sexo,
                 'tipo_usuario' => 'Registrado'
             ]);
 
@@ -329,7 +370,6 @@ class UserController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
-            // Esto te ayudará a ver el error real si pasa otra cosa
             return response()->json([
                 'success' => false,
                 'message' => 'Error en base de datos',
@@ -337,6 +377,7 @@ class UserController extends Controller
             ], 500);
         }
     }
+   
 
 
   

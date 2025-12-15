@@ -6,24 +6,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
-    {
-        Schema::create('user_progress', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            
-            // Datos físicos
-            $table->decimal('peso', 5, 2); // Ej: 80.50
-            $table->decimal('altura', 3, 2)->nullable(); // Ej: 1.75
-            $table->decimal('cintura', 5, 2)->nullable(); // Medida opcional
-            
-            // Foto
-            $table->string('foto_path')->nullable(); // Guardaremos la ruta de la imagen
-            
-            $table->text('notas')->nullable();
-            $table->timestamps();
-        });
-    }
+   public function up(): void
+{
+    Schema::create('user_progress', function (Blueprint $table) {
+        $table->id();
+        $table->foreignId('user_id')->constrained()->onDelete('cascade');
+        
+        // CAMBIA ESTO:
+        // Antes probablemente tenías $table->tinyInteger('altura');
+        
+        // POR ESTO (Float acepta decimales y números grandes, Integer solo enteros):
+        $table->float('peso');   // Ejemplo: 90.5
+        $table->integer('altura'); // Ejemplo: 188 (en cm)
+        
+        $table->integer('cintura')->nullable();
+        $table->string('foto_path')->nullable();
+        $table->integer('edad')->nullable();
+        $table->timestamps();
+    });
+}
 
     public function down()
     {

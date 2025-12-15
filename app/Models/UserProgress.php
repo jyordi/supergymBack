@@ -11,19 +11,13 @@ class UserProgress extends Model
 
     protected $table = 'user_progress';
 
+    // ESTO ES LO MÁS IMPORTANTE PARA EVITAR ERROR 500
     protected $fillable = [
         'user_id',
         'peso',
         'altura',
         'cintura',
         'foto_path',
-        'notas',
-        'avatar'
+        'notas'
     ];
-
-    // Relación inversa
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
 }

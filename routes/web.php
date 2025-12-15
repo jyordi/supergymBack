@@ -37,9 +37,15 @@ Route::post('reset-password', [UserController::class, 'resetPassword']);
     Route::get('/usuarios/{id}', [UserController::class, 'show']);
     Route::put('/usuarios/{id}', [UserController::class, 'update']);
     Route::delete('/usuarios/{id}', [UserController::class, 'destroy']);
+    
+    
+    
     Route::post('/users/{id}/actualizar', [UserController::class, 'actualizarDatos']);
     Route::post('/users/{id}/avatar', [UserController::class, 'actualizarAvatar']);
 
+    
+
+    Route::get('/users/{id}/progress-history', [UserController::class, 'getProgressHistory']);
     // Nota: Si deseas mantener login/logout, debes agregar esos métodos a tu UserController
     // Route::post('/login', [UserController::class, 'login']);
     // Route::post('/logout', [UserController::class, 'logout']);
@@ -51,6 +57,7 @@ Route::post('reset-password', [UserController::class, 'resetPassword']);
     Route::put('/historials/{id}', [HistorialController::class, 'update']);
     Route::delete('/historials/{id}', [HistorialController::class, 'destroy']);
     Route::get('/historials/user/{user_id}', [HistorialController::class, 'byUser']);
+    Route::get('/historial/peso/{user_id}', [StatsController::class, 'getWeightHistory']);
 
     // --- EJERCICIOS (ExerciseController) ---
     // Listar todos los ejercicios
@@ -124,4 +131,6 @@ Route::post('/historial', [StatsController::class, 'store']);
 
 // Obtener datos para el dashboard (home)
 Route::get('/historial/stats/{user_id}', [StatsController::class, 'getStats']);
+
+Route::get('/historial/peso/{user_id}', [StatsController::class, 'getWeightHistory']);
 });
