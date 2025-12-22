@@ -41,21 +41,23 @@ class ExerciseController extends Controller
             DB::beginTransaction();
 
             foreach ($data as $item) {
-                // 1. Mapear nivel 'expert' a 'advanced' para cumplir con el enum de la DB
+                // 1. CORRECCIÓN NIVEL: Mapear 'avanzado' y 'experto' a 'advanced'
                 $level = strtolower($item['level']);
-                if ($level === 'expert' || $level === 'experto') {
+                
+                if ($level === 'expert' || $level === 'experto' || $level === 'avanzado') {
                     $level = 'advanced';
                 } elseif ($level === 'principiante') {
                     $level = 'beginner';
                 } elseif ($level === 'intermedio') {
                     $level = 'intermediate';
                 }
+                // Si no entra en ninguno (ej. ya viene como 'beginner'), se queda igual.
 
-                // 2. Mapear fuerza (traducir si viene en español al inglés del enum si es necesario)
+                // 2. CORRECCIÓN FUERZA: Mapear 'tracción', 'tirón', 'empuje', etc.
                 $force = match(strtolower($item['force'] ?? '')) {
                     'empuje', 'push' => 'push',
-                    'tirón', 'pull' => 'pull',
-                    'estático', 'static' => 'static',
+                    'tirón', 'tracción', 'pull' => 'pull', // Ahora acepta "tracción"
+                    'estático', 'isométrico', 'static' => 'static', // Ahora acepta "isométrico"
                     default => null
                 };
 
@@ -101,6 +103,7 @@ class ExerciseController extends Controller
             return response()->json(['error' => 'Error al importar: ' . $e->getMessage()], 500);
         }
     }
+
 
     public function show($id)
     {
