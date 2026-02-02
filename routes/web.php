@@ -147,6 +147,7 @@ Route::get('/users/{id}/rutina-actual', [RutinaSemanalController::class, 'show']
 Route::put('/rutinas-semanales/{id}', [RutinaSemanalController::class, 'update']);
 
 // Eliminar rutina
+Route::delete('/users/{id}', [UserController::class, 'destroy']);
 Route::delete('/rutinas-semanales/{id}', [RutinaSemanalController::class, 'destroy']);
 
 
