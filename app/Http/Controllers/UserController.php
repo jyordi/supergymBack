@@ -217,9 +217,30 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+   /**
+     * Remove the specified resource from storage.
+     */
     public function destroy(string $id)
     {
-        //
+        // 1. Buscar usuario
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Usuario no encontrado'
+            ], 404);
+        }
+
+        // 2. Eliminar (Opcional: borrar historial antes si no tienes borrado en cascada)
+        // UserProgress::where('user_id', $id)->delete(); 
+        
+        $user->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Usuario eliminado correctamente'
+        ]);
     }
 
 
@@ -256,6 +277,7 @@ class UserController extends Controller
             'created_at' => Carbon::now()
         ]);
 
+        
         // 4. Enviar Email (Aquí simulamos el envío para que puedas probar en Postman)
         /* TODO: Configurar Mailtrap o SMTP en .env y descomentar esto:
            Mail::send('emails.password_reset', ['token' => $token], function($message) use ($email){
