@@ -9,6 +9,7 @@ use App\Http\Controllers\HistorialController;
 use App\Http\Controllers\ExerciseController;
 // Necesario para la excepción en línea
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken; 
+use Illuminate\Support\Facades\Artisan;
 
 Route::get('/', function () {
     return view('welcome');
@@ -151,4 +152,14 @@ Route::delete('/users/{id}', [UserController::class, 'destroy']);
 Route::delete('/rutinas-semanales/{id}', [RutinaSemanalController::class, 'destroy']);
 
 
+});
+
+// Ruta para crear el enlace simbólico de storage
+Route::get('/run-storage-link', function () {
+    try {
+        Artisan::call('storage:link');
+        return '¡Éxito! Enlace simbólico creado correctamente.';
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
 });
