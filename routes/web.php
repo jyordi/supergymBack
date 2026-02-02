@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RutinaSemanalController;
 use App\Http\Controllers\StatsController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
@@ -133,4 +134,20 @@ Route::post('/historial', [StatsController::class, 'store']);
 Route::get('/historial/stats/{user_id}', [StatsController::class, 'getStats']);
 
 Route::get('/historial/peso/{user_id}', [StatsController::class, 'getWeightHistory']);
+
+
+
+// Asignar nueva rutina a usuario
+Route::post('/rutinas-semanales', [RutinaSemanalController::class, 'store']);
+
+// Ver rutina activa de un usuario (por ID de usuario)
+Route::get('/users/{id}/rutina-actual', [RutinaSemanalController::class, 'show']);
+
+// Editar nombre/estado de una rutina
+Route::put('/rutinas-semanales/{id}', [RutinaSemanalController::class, 'update']);
+
+// Eliminar rutina
+Route::delete('/rutinas-semanales/{id}', [RutinaSemanalController::class, 'destroy']);
+
+
 });

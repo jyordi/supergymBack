@@ -10,10 +10,12 @@ class Rutina extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'nombre',
         'descripcion',
         'dia',
-        'nivel'
+        'nivel',
+        'activa'
     ];
 
     /**
@@ -34,5 +36,13 @@ class Rutina extends Model
     public function dias()
     {
         return $this->hasMany(RutinaDia::class);
+    }
+
+    /**
+     * Relación inversa con usuario
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

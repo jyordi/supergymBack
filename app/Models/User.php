@@ -32,14 +32,28 @@ class User extends Authenticatable implements JWTSubject
         'remember_token',
     ];
 
-    
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'fecha_nacimiento' => 'date', 
     ];
 
-  
+    /**
+     * Relación: User -> Rutinas
+     */
+    public function rutinas()
+    {
+        return $this->hasMany(Rutina::class);
+    }
+
+    /**
+     * Para obtener rápido la rutina actual del usuario
+     */
+    public function rutinaActual()
+    {
+        return $this->hasOne(Rutina::class)->where('activa', true)->latest();
+    }
+
     public function getJWTIdentifier() { return $this->getKey(); }
     public function getJWTCustomClaims() { return []; }
 }
