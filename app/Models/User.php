@@ -59,14 +59,19 @@ class User extends Authenticatable implements JWTSubject
 
 
     /**
-     * Esto asegura que el frontend siempre reciba el link completo de la foto
+     * Asegura el link con HTTPS forzado para Railway
      */
     public function getAvatarAttribute($value)
     {
         if ($value) {
-            // Si ya empieza con http, lo deja igual. Si no, le agrega la URL de Railway.
-            return str_starts_with($value, 'http') ? $value : asset('storage/' . $value);
+            // Si ya tiene el link completo, lo deja pasar
+            if (str_starts_with($value, 'http')) {
+                return $value;
+            }
+            // Si no, forzamos el HTTPS con tu dominio de Railway
+            return 'https://supergymback-production.up.railway.app/storage/' . $value;
         }
-        return null; // O pon aquí un link a un avatar genérico por defecto
+        // Si no hay foto, mandamos null para que el HTML use el de defecto
+        return null; 
     }
 }
