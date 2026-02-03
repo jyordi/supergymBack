@@ -21,9 +21,13 @@ class RutinaDia extends Model
      * ¡AQUÍ ESTÁ EL CAMBIO! 
      * Cambiamos 'ejercicios' por 'exercises' para que coincida con tu controlador.
      */
+    /**
+     * Relación con los ejercicios
+     */
     public function exercises()
     {
-        return $this->belongsToMany(Exercise::class, 'rutina_dia_ejercicio')
+        // Parámetros: (Modelo, Tabla Pivote, Llave Local en Pivote, Llave Foránea en Pivote)
+        return $this->belongsToMany(Exercise::class, 'rutina_dia_ejercicio', 'rutina_dia_id', 'ejercicio_id')
                     ->withPivot('series', 'repeticiones', 'id')
                     ->withTimestamps();
     }
