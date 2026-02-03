@@ -174,4 +174,8 @@ Route::get('/limpiar-cache', function () {
     return '¡Caché limpiada con éxito, Guerrero!';
 });
 
+Route::get('/crear-link', function () {
+    \Illuminate\Support\Facades\Artisan::call('storage:link');
+    return '¡Puente de imágenes creado con éxito!';
+});
 
