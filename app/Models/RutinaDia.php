@@ -18,9 +18,10 @@ class RutinaDia extends Model
     }
 
     /**
-     * Relación con los ejercicios
+     * ¡AQUÍ ESTÁ EL CAMBIO! 
+     * Cambiamos 'ejercicios' por 'exercises' para que coincida con tu controlador.
      */
-    public function ejercicios()
+    public function exercises()
     {
         return $this->belongsToMany(Exercise::class, 'rutina_dia_ejercicio')
                     ->withPivot('series', 'repeticiones', 'id')
