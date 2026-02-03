@@ -281,7 +281,7 @@ class RutinaController extends Controller
                         if (isset($diaData['ejercicios']) && is_array($diaData['ejercicios'])) {
                             foreach ($diaData['ejercicios'] as $ejercicioData) {
                                 // Buscar por nombre exacto
-                                $ejercicio = Exercise::where('name', $ejercicioData['nombre'])->first();
+                               $ejercicio = Exercise::where('name', 'LIKE', $ejercicioData['nombre'])->first();
                                 
                                 if ($ejercicio) {
                                     $rutinaDia->exercises()->attach($ejercicio->id, [
