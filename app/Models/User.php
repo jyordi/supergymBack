@@ -56,4 +56,17 @@ class User extends Authenticatable implements JWTSubject
 
     public function getJWTIdentifier() { return $this->getKey(); }
     public function getJWTCustomClaims() { return []; }
+
+
+    /**
+     * Esto asegura que el frontend siempre reciba el link completo de la foto
+     */
+    public function getAvatarAttribute($value)
+    {
+        if ($value) {
+            // Si ya empieza con http, lo deja igual. Si no, le agrega la URL de Railway.
+            return str_starts_with($value, 'http') ? $value : asset('storage/' . $value);
+        }
+        return null; // O pon aquí un link a un avatar genérico por defecto
+    }
 }
